@@ -1,0 +1,6 @@
+[db]
+host = HOST
+port = PORT
+user = USER
+pass = PASS
+db_name = DB_NAME

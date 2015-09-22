@@ -1,0 +1,6 @@
+*.pyc
+.DS_store
+*Tokens.txt
+tokens.csv
+log.log
+config.ini

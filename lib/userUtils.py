@@ -1,16 +1,12 @@
-import requests, random, progressbar, time, ConfigParser, sys, traceback
+import requests, random, progressbar, time, ConfigParser, sys, traceback, datetime, threading
 from tokenUtils import *
 from dbUtils import dbInsert
 from multiprocessing import Process, Lock, Queue, current_process
 from loggingUtils import *
 from slack import alert
-import time
 
 logger = getLogger(__name__)
 all_tokens = None
-start_time = 0
-time_since_alert = 0
-found_since_last_alert = 0
 
 def config():
     c = ConfigParser.ConfigParser()
@@ -18,12 +14,6 @@ def config():
 
 def getUser(id, token):
     global logger
-    global start_time
-    global time_since_alert
-    global found_since_last_alert
-
-    time_since_alert = time.time() - start_time
-    log("Getting user {}".format(id))
 
     payload = {'access_token': token['token']}
     url = "https://api.instagram.com/v1/users/{}".format(str(id))
@@ -37,7 +27,6 @@ def getUser(id, token):
         logger.info("Successfully got user {}: {}".format(id, r.text))
 
     if r.json()['data']['counts']['followed_by'] >= 5000:
-        found_since_last_alert += 1
         user = format_user(r.json())
 
         try:
@@ -48,12 +37,6 @@ def getUser(id, token):
     		print traceback.format_exc()
     		quit()
 
-    if time_since_alert >= 60:
-        alert("Found {} users since the last alert.".format(found_since_last_alert))
-        start_time = time.time()
-        found_since_last_alert = 0
-        time_since_alert = 0
-        
 	return r.json()
 
 def user_worker(work_queue, done_queue):
@@ -72,8 +55,6 @@ def get_users(tokens, start=1):
     """
         Runs processes to find all users
     """
-    global start_time = time.time()
-
     user_ids = xrange(start, start+200)
     workers = 200
     work_queue = Queue()
@@ -94,11 +75,11 @@ def get_users(tokens, start=1):
 
     for w in xrange(workers):
         p = Process(target=user_worker, args=(work_queue, done_queue))
-        p.start()
         processes.append(p)
         work_queue.put('STOP')
 
     for p in processes:
+        p.start()
         p.join()
 
     done_queue.put('STOP')

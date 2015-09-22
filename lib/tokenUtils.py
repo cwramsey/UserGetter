@@ -55,7 +55,7 @@ def checkToken(token):
         else:
             return False
     else:
-        alert("Token: {}\nStatus Code: {}".format(token, r.status_code))
+        log("Token: {}\nStatus Code: {}".format(token, r.status_code))
         return False
 
 def writeTokenToFile(token, isValid):
@@ -127,11 +127,11 @@ def get_tokens():
 
     for w in xrange(workers):
         p = Process(target=token_worker, args=(work_queue, done_queue))
-        p.start()
         processes.append(p)
         work_queue.put('STOP')
 
     for p in processes:
+        p.start()
         p.join()
 
     done_queue.put('STOP')

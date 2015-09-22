@@ -40,14 +40,12 @@ def checkToken(token):
         Hits an instagram endpoint with a token to check it's validity.
         If a 400 is returned, it's not valid.
     """
-    alert("test")
 
-    log("checking {}".format(token))
     payload = {'access_token': token}
     url = "https://api.instagram.com/v1/users/self/feed"
     r = requests.get(url, params=payload)
 
-    log(r.status_code)
+    log("Token: {} - Status Code: {}".format(token, r.status_code))
 
     if r.status_code != 502:
         result = r.json()
@@ -119,7 +117,7 @@ def get_tokens():
     logger.info("Validating tokens")
 
     all_tokens = readTokens()
-    workers = 500
+    workers = 50
     work_queue = Queue()
     done_queue = Queue()
     processes = []

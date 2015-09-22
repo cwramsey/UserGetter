@@ -1,6 +1,6 @@
 import re, requests, random, logging
 from multiprocessing import Process, Lock, Queue, current_process
-from loggingUtils import getLogger
+from loggingUtils import *
 from slack import alert
 
 logger = getLogger(__name__)
@@ -9,6 +9,7 @@ def readTokens():
     """
         Reads the tokens file and uses a regex to find the tokens in each row
     """
+    log("Getting token list")
     file = open('tokens.csv', 'r')
     tokens = []
 
@@ -39,9 +40,13 @@ def checkToken(token):
         Hits an instagram endpoint with a token to check it's validity.
         If a 400 is returned, it's not valid.
     """
+
+    log("checking {}".format(token))
     payload = {'access_token': token}
     url = "https://api.instagram.com/v1/users/self/feed"
     r = requests.get(url, params=payload)
+
+    log(r.status_code)
 
     if r.status_code != 502:
         result = r.json()
@@ -51,7 +56,7 @@ def checkToken(token):
         else:
             return False
     else:
-
+        alert("Token: {}\nStatus Code: {}".format(token, r.status_code))
         return False
 
 def writeTokenToFile(token, isValid):

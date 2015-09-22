@@ -1,4 +1,12 @@
 import logging
+from ConfigParser import SafeConfigParser
+
+config = SafeConfigParser()
+config.read('./config.ini')
+
+def log(msg):
+    if config.get('env', 'env') == 'dev':
+        print msg
 
 def getLogger(name):
     logger = logging.getLogger(name)

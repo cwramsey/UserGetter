@@ -40,6 +40,7 @@ def checkToken(token):
         Hits an instagram endpoint with a token to check it's validity.
         If a 400 is returned, it's not valid.
     """
+    alert("test")
 
     log("checking {}".format(token))
     payload = {'access_token': token}

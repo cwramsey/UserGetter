@@ -30,32 +30,33 @@ def dbCreateUserTable():
 
     global logger
 
-    logger.info("Creating users table if it does not exist")
-    con = dbConnect()
-    query = "CREATE TABLE IF NOT EXISTS `users` ( \
-          `id` bigint(100) unsigned NOT NULL, \
-          `username` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL, \
-          `fullname` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL, \
-          `bio` text COLLATE utf8mb4_unicode_ci NOT NULL, \
-          `website` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL, \
-          `avatar` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL, \
-          `count_media` int(10) unsigned NOT NULL, \
-          `count_followers` int(10) unsigned NOT NULL, \
-          `count_follows` int(10) unsigned NOT NULL, \
-          `user_id` bigint(100) NOT NULL \
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; \
-        ALTER TABLE `users` \
-          ADD PRIMARY KEY (`id`); \
-        ALTER TABLE `users` \
-          MODIFY `id` bigint(100) unsigned NOT NULL AUTO_INCREMENT;"
+    if config.get('env', 'env') != 'dev':
+        logger.info("Creating users table if it does not exist")
+        con = dbConnect()
+        query = "CREATE TABLE IF NOT EXISTS `users` ( \
+              `id` bigint(100) unsigned NOT NULL, \
+              `username` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL, \
+              `fullname` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL, \
+              `bio` text COLLATE utf8mb4_unicode_ci NOT NULL, \
+              `website` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL, \
+              `avatar` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL, \
+              `count_media` int(10) unsigned NOT NULL, \
+              `count_followers` int(10) unsigned NOT NULL, \
+              `count_follows` int(10) unsigned NOT NULL, \
+              `user_id` bigint(100) NOT NULL \
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; \
+            ALTER TABLE `users` \
+              ADD PRIMARY KEY (`id`); \
+            ALTER TABLE `users` \
+              MODIFY `id` bigint(100) unsigned NOT NULL AUTO_INCREMENT;"
 
-    try:
-        with con.cursor() as cursor:
-            cursor.execute(query)
+        try:
+            with con.cursor() as cursor:
+                cursor.execute(query)
 
-        con.commit()
-    finally:
-        con.close()
+            con.commit()
+        finally:
+            con.close()
 
 
 
@@ -64,15 +65,19 @@ def dbSelectLast():
     """
         Pulls the most recent user from the list in case we're starting over again if something happens.
     """
-    con = dbConnect()
-    try:
-        with con.cursor() as cursor:
-            sql = "SELECT * FROM users ORDER BY ID DESC LIMIT 1;"
-            cursor.execute(sql)
-            result = cursor.fetchone()
-            return result
-    finally:
-        con.close()
+
+    if config.get('env', 'env') != 'dev':
+        con = dbConnect()
+        try:
+            with con.cursor() as cursor:
+                sql = "SELECT * FROM users ORDER BY ID DESC LIMIT 1;"
+                cursor.execute(sql)
+                result = cursor.fetchone()
+                return result
+        finally:
+            con.close()
+    else:
+        return 1
 
 def dbInsert(vals):
     """
@@ -80,12 +85,13 @@ def dbInsert(vals):
         Inserts a user into the DB
     """
 
-    con = dbConnect()
-    try:
-        with con.cursor() as cursor:
-            sql = "INSERT IGNORE INTO users (username, fullname, bio, website, avatar, count_media, count_followers, count_follows, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
-            cursor.execute(sql, vals)
+    if config.get('env', 'env') != 'dev':
+        con = dbConnect()
+        try:
+            with con.cursor() as cursor:
+                sql = "INSERT IGNORE INTO users (username, fullname, bio, website, avatar, count_media, count_followers, count_follows, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+                cursor.execute(sql, vals)
 
-        con.commit()
-    finally:
-        con.close()
+            con.commit()
+        finally:
+            con.close()

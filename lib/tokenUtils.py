@@ -1,6 +1,7 @@
 import re, requests, random, logging
 from multiprocessing import Process, Lock, Queue, current_process
 from loggingUtils import getLogger
+from slack import alert
 
 logger = getLogger(__name__)
 
@@ -41,15 +42,16 @@ def checkToken(token):
     payload = {'access_token': token}
     url = "https://api.instagram.com/v1/users/self/feed"
     r = requests.get(url, params=payload)
-    
+
     if r.status_code != 502:
         result = r.json()
-    
+
         if result['meta']['code'] is 200:
             return True
         else:
             return False
     else:
+
         return False
 
 def writeTokenToFile(token, isValid):

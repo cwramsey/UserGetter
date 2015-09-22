@@ -10,19 +10,18 @@
         -s  Start at a specific user id
 """
 from docopt import docopt
-from tokenUtils import *
-from userUtils import *
+from lib.tokenUtils import *
+from lib.userUtils import *
 import time
-from dbUtils import dbSelectLast
 
 if __name__ == '__main__':
-    start = dbSelectLast()[u'user_id']
-    print "Starting at {}".format(start)
+
+    start = 1
 
     args = docopt(__doc__)
 
     if args['-s']:
-        start = int(args['ID'])
+        start = args['ID']
 
     #Get valid tokens from the token file
     valid_tokens = get_tokens()
